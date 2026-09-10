@@ -1,75 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxy Viewer</title>
-    <style>
-        /* Make the iframe take up the entire screen */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: #111;
-            color: white;
-            font-family: sans-serif;
-        }
-        #viewer { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-        }
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:sans-serif}
+#x1{width:100%;height:100%;border:none}
+#x2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+</style>
 </head>
 <body>
-    
-    <div id="loading">Loading via Relay...</div>
-    <iframe id="viewer"></iframe>
 
-    <script>
-        // 1. Your active Vercel domain
-        const yourVercelDomain = 'https://network-nine-alpha.vercel.app'; 
-        
-        // 2. The target website
-        const targetURL = 'https://core-logic-utils.github.io';
+<div id="x2">Loading...</div>
+<iframe id="x1"></iframe>
 
-        // 3. Construct the relay URL
-        const relayURL = `${yourVercelDomain}/api/relay?url=${encodeURIComponent(targetURL)}`;
+<script>
+(function(){
+    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
 
-        // 4. Fetch the website data
-        fetch(relayURL)
-            .then(response => {
-                if (!response.ok) throw new Error("Network response was not ok");
-                return response.text();
-            })
-            .then(html => {
-                // Hide the loading text
-                document.getElementById('loading').style.display = 'none';
+    const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA=="); 
+    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
 
-                // Inject a <base> tag right after the <head> tag
-                // This ensures all CSS, JS, and images load correctly from the target URL
-                let modifiedHtml = html;
-                if (modifiedHtml.includes('<head>')) {
-                    modifiedHtml = modifiedHtml.replace('<head>', `<head><base href="${targetURL}/">`);
-                } else {
-                    // Fallback if the site has no <head> tag
-                    modifiedHtml = `<base href="${targetURL}/">` + modifiedHtml;
-                }
+    const C = A + "/api/relay?url=" + encodeURIComponent(B);
 
-                // Push the modified HTML into the iframe
-                document.getElementById('viewer').srcdoc = modifiedHtml;
-            })
-            .catch(error => {
-                console.error("Error loading site:", error);
-                document.getElementById('loading').innerText = "Failed to load the website.";
-            });
-    </script>
+    fetch(C).then(function(D){
+        if(!D.ok) throw new Error("x");
+        return D.text();
+    }).then(function(E){
+        document.getElementById("x2").style.display="none";
+
+        let F = E;
+        if(F.indexOf("<head>")!==-1){
+            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
+        } else {
+            F = "<base href=\"" + B + "/\">" + F;
+        }
+
+        document.getElementById("x1").srcdoc = F;
+    }).catch(function(G){
+        console.log("x",G);
+        document.getElementById("x2").innerText="Failed.";
+    });
+})();
+</script>
+
 </body>
 </html>
