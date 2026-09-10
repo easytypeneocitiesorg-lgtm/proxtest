@@ -1,156 +1,75 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Container</title>
-
-```
-<style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: #111;
-    }
-
-    #blankFrame {
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: block;
-    }
-</style>
-```
-
+    <title>Proxy Viewer</title>
+    <style>
+        /* Make the iframe take up the entire screen */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #111;
+            color: white;
+            font-family: sans-serif;
+        }
+        #viewer { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
 </head>
-
 <body>
+    
+    <div id="loading">Loading via Relay...</div>
+    <iframe id="viewer"></iframe>
 
-<iframe id="blankFrame" src="about:blank"></iframe>
+    <script>
+        // 1. Your active Vercel domain
+        const yourVercelDomain = 'https://network-nine-alpha.vercel.app'; 
+        
+        // 2. The target website
+        const targetURL = 'https://core-logic-utils.github.io';
 
-<script>
-    const yourVercelDomain = 'https://network-nine-alpha.vercel.app';
-    const targetURL = 'https://core-logic-utils.github.io';
+        // 3. Construct the relay URL
+        const relayURL = `${yourVercelDomain}/api/relay?url=${encodeURIComponent(targetURL)}`;
 
-    const relayURL =
-        `${yourVercelDomain}/api/relay?url=${encodeURIComponent(targetURL)}`;
+        // 4. Fetch the website data
+        fetch(relayURL)
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.text();
+            })
+            .then(html => {
+                // Hide the loading text
+                document.getElementById('loading').style.display = 'none';
 
-    async function loadSite() {
-        try {
-            console.log('Requesting:', relayURL);
+                // Inject a <base> tag right after the <head> tag
+                // This ensures all CSS, JS, and images load correctly from the target URL
+                let modifiedHtml = html;
+                if (modifiedHtml.includes('<head>')) {
+                    modifiedHtml = modifiedHtml.replace('<head>', `<head><base href="${targetURL}/">`);
+                } else {
+                    // Fallback if the site has no <head> tag
+                    modifiedHtml = `<base href="${targetURL}/">` + modifiedHtml;
+                }
 
-            const response = await fetch(relayURL);
-
-            console.log('Proxy response:', response.status, response.statusText);
-
-            if (!response.ok) {
-                throw new Error(
-                    `Proxy returned ${response.status} ${response.statusText}`
-                );
-            }
-
-            let html = await response.text();
-
-            console.log('Received HTML length:', html.length);
-
-            if (!html || !html.trim()) {
-                throw new Error('Proxy returned an empty response.');
-            }
-
-            /*
-             * Add a base URL so relative resources such as:
-             *
-             * /style.css
-             * /script.js
-             * images/foo.png
-             *
-             * resolve against the target website.
-             */
-            if (/<head\b[^>]*>/i.test(html)) {
-                html = html.replace(
-                    /<head\b[^>]*>/i,
-                    match => `${match}<base href="${targetURL}/">`
-                );
-            } else {
-                html = `<base href="${targetURL}/">${html}`;
-            }
-
-            const blankFrame = document.getElementById('blankFrame');
-            const blankDoc = blankFrame.contentWindow.document;
-
-            /*
-             * Keep the original nested iframe design.
-             */
-            blankDoc.open();
-
-            blankDoc.write(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-
-                    <style>
-                        html, body {
-                            margin: 0;
-                            padding: 0;
-                            width: 100%;
-                            height: 100%;
-                            overflow: hidden;
-                            background: #111;
-                        }
-
-                        #contentFrame {
-                            width: 100%;
-                            height: 100%;
-                            border: none;
-                            display: block;
-                        }
-                    </style>
-
-```
-            </head>
-
-            <body>
-                <iframe id="contentFrame"></iframe>
-
-                <script>
-                    const page =
-                        ${JSON.stringify(html)};
-
-                    document.getElementById('contentFrame').srcdoc = page;
-                <\/script>
-            </body>
-            </html>
-        `);
-
-        blankDoc.close();
-
-        console.log('Proxied page inserted successfully.');
-
-    } catch (error) {
-        console.error('Error loading site through proxy:', error);
-
-        document.body.innerHTML = `
-            <div style="
-                color: white;
-                font-family: Arial, sans-serif;
-                padding: 30px;
-            ">
-                <h2>Proxy loading failed</h2>
-                <pre style="white-space: pre-wrap;">${error.message}</pre>
-            </div>
-        `;
-    }
-}
-
-loadSite();
-```
-
-</script>
-
+                // Push the modified HTML into the iframe
+                document.getElementById('viewer').srcdoc = modifiedHtml;
+            })
+            .catch(error => {
+                console.error("Error loading site:", error);
+                document.getElementById('loading').innerText = "Failed to load the website.";
+            });
+    </script>
 </body>
 </html>
