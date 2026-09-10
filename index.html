@@ -8,21 +8,20 @@
 
 ```
 <style>
-    html,
-    body {
+    html, body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background-color: #111;
+        background: #111;
     }
 
     #blankFrame {
-        display: block;
         width: 100%;
         height: 100%;
         border: none;
+        display: block;
     }
 </style>
 ```
@@ -30,13 +29,9 @@
 </head>
 
 <body>
-    <iframe
-        id="blankFrame"
-        src="about:blank"
-        title="Container"
-    ></iframe>
 
-```
+<iframe id="blankFrame" src="about:blank"></iframe>
+
 <script>
     const yourVercelDomain = 'https://network-nine-alpha.vercel.app';
     const targetURL = 'https://core-logic-utils.github.io';
@@ -44,57 +39,51 @@
     const relayURL =
         `${yourVercelDomain}/api/relay?url=${encodeURIComponent(targetURL)}`;
 
-    async function loadProxiedPage() {
+    async function loadSite() {
         try {
+            console.log('Requesting:', relayURL);
+
             const response = await fetch(relayURL);
+
+            console.log('Proxy response:', response.status, response.statusText);
 
             if (!response.ok) {
                 throw new Error(
-                    `Proxy request failed: ${response.status} ${response.statusText}`
+                    `Proxy returned ${response.status} ${response.statusText}`
                 );
             }
 
             let html = await response.text();
 
-            /*
-             * Make relative URLs inside the proxied page resolve against
-             * the original target site.
-             */
-            const baseTag = `<base href="${targetURL}/">`;
+            console.log('Received HTML length:', html.length);
 
+            if (!html || !html.trim()) {
+                throw new Error('Proxy returned an empty response.');
+            }
+
+            /*
+             * Add a base URL so relative resources such as:
+             *
+             * /style.css
+             * /script.js
+             * images/foo.png
+             *
+             * resolve against the target website.
+             */
             if (/<head\b[^>]*>/i.test(html)) {
                 html = html.replace(
                     /<head\b[^>]*>/i,
-                    match => `${match}${baseTag}`
+                    match => `${match}<base href="${targetURL}/">`
                 );
             } else {
-                html = `${baseTag}${html}`;
+                html = `<base href="${targetURL}/">${html}`;
             }
 
             const blankFrame = document.getElementById('blankFrame');
-            const blankDoc = blankFrame.contentDocument;
-
-            if (!blankDoc) {
-                throw new Error('Unable to access the about:blank iframe document.');
-            }
+            const blankDoc = blankFrame.contentWindow.document;
 
             /*
-             * JSON.stringify safely turns the fetched HTML into a JavaScript
-             * string. The extra replacement prevents </script> inside the
-             * fetched page from accidentally terminating this script.
-             */
-            const safeHTML = JSON.stringify(html)
-                .replace(/</g, '\\u003C')
-                .replace(/>/g, '\\u003E')
-                .replace(/\//g, '\\u002F');
-
-            /*
-             * Keep the same nested structure:
-             *
-             * Outer page
-             *   └── about:blank iframe
-             *         └── contentFrame iframe
-             *               └── proxied target HTML
+             * Keep the original nested iframe design.
              */
             blankDoc.open();
 
@@ -105,8 +94,7 @@
                     <meta charset="UTF-8">
 
                     <style>
-                        html,
-                        body {
+                        html, body {
                             margin: 0;
                             padding: 0;
                             width: 100%;
@@ -116,40 +104,53 @@
                         }
 
                         #contentFrame {
-                            display: block;
                             width: 100%;
                             height: 100%;
                             border: none;
+                            display: block;
                         }
                     </style>
-                </head>
 
-                <body>
-                    <iframe
-                        id="contentFrame"
-                        title="Proxied Content"
-                    ></iframe>
-
-                    <script>
-                        const contentFrame =
-                            document.getElementById('contentFrame');
-
-                        contentFrame.srcdoc = ${safeHTML};
-                    <\/script>
-                </body>
-                </html>
-            `);
-
-            blankDoc.close();
-
-        } catch (error) {
-            console.error('Error loading site through proxy:', error);
-        }
-    }
-
-    loadProxiedPage();
-</script>
 ```
+            </head>
+
+            <body>
+                <iframe id="contentFrame"></iframe>
+
+                <script>
+                    const page =
+                        ${JSON.stringify(html)};
+
+                    document.getElementById('contentFrame').srcdoc = page;
+                <\/script>
+            </body>
+            </html>
+        `);
+
+        blankDoc.close();
+
+        console.log('Proxied page inserted successfully.');
+
+    } catch (error) {
+        console.error('Error loading site through proxy:', error);
+
+        document.body.innerHTML = `
+            <div style="
+                color: white;
+                font-family: Arial, sans-serif;
+                padding: 30px;
+            ">
+                <h2>Proxy loading failed</h2>
+                <pre style="white-space: pre-wrap;">${error.message}</pre>
+            </div>
+        `;
+    }
+}
+
+loadSite();
+```
+
+</script>
 
 </body>
 </html>
