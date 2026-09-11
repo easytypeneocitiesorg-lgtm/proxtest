@@ -22,59 +22,26 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#
     const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA=="); 
     const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
 
-    // Make the loading function global so the iframe can call it
-    window.loadUrl = function(targetUrl) {
-        // Show loading text
-        document.getElementById("x2").style.display = "block";
-        document.getElementById("x2").innerText = "Loading...";
+    const C = A + "/api/relay?url=" + encodeURIComponent(B);
 
-        const C = A + "/api/relay?url=" + encodeURIComponent(targetUrl);
+    fetch(C).then(function(D){
+        if(!D.ok) throw new Error("x");
+        return D.text();
+    }).then(function(E){
+        document.getElementById("x2").style.display="none";
 
-        fetch(C).then(function(D){
-            if(!D.ok) throw new Error("x");
-            return D.text();
-        }).then(function(E){
-            document.getElementById("x2").style.display="none";
+        let F = E;
+        if(F.indexOf("<head>")!==-1){
+            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
+        } else {
+            F = "<base href=\"" + B + "/\">" + F;
+        }
 
-            // Figure out the base path for the new URL so relative assets still load
-            let basePath = targetUrl;
-            if (!basePath.endsWith('/')) {
-                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-            }
-            if (!basePath) basePath = B + "/";
-
-            let F = E;
-            
-            // 1. Set the base href so relative links become absolute URLs
-            const baseTag = "<base href=\"" + basePath + "\">";
-            
-            // 2. Inject a script that listens for link clicks inside the iframe
-            const interceptScript = `<script>
-                document.addEventListener('click', function(e) {
-                    const a = e.target.closest('a');
-                    // If a link was clicked and it's a standard web link
-                    if (a && a.href && a.href.startsWith('http')) {
-                        e.preventDefault(); // Stop normal navigation
-                        window.parent.loadUrl(a.href); // Send it through the proxy
-                    }
-                });
-            <\/script>`;
-
-            if(F.indexOf("<head>")!==-1){
-                F = F.replace("<head>", "<head>" + baseTag + interceptScript);
-            } else {
-                F = baseTag + interceptScript + F;
-            }
-
-            document.getElementById("x1").srcdoc = F;
-        }).catch(function(G){
-            console.log("x",G);
-            document.getElementById("x2").innerText="Failed.";
-        });
-    };
-
-    // Initial load
-    window.loadUrl(B);
+        document.getElementById("x1").srcdoc = F;
+    }).catch(function(G){
+        console.log("x",G);
+        document.getElementById("x2").innerText="Failed.";
+    });
 })();
 </script>
 
