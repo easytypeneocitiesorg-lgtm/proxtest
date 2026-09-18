@@ -49,14 +49,63 @@ html, body {
     .then(function(html) {
       document.getElementById("x2").style.display = "none";
         
+      const interceptor = `
+      <script>
+      (function() {
+          const PROXY_BASE = "${relayBase}/api/relay?url=";
+          const TARGET_BASE = "${targetOrigin}/";
+          
+          function rewrite(u) {
+              if (!u || typeof u !== 'string') return u;
+              if (u.startsWith('blob:') || u.startsWith('data:') || u.startsWith(PROXY_BASE)) return u;
+              try {
+                  const abs = new URL(u, TARGET_BASE).href;
+                  return PROXY_BASE + encodeURIComponent(abs);
+              } catch(e) {
+                  return u;
+              }
+          }
+
+          const oldFetch = window.fetch;
+          window.fetch = async function(...args) {
+              if (typeof args[0] === 'string') args[0] = rewrite(args[0]);
+              else if (args[0] && args[0].url) args[0] = new Request(rewrite(args[0].url), args[0]);
+              return oldFetch.apply(this, args);
+          };
+
+          const oldOpen = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function(...args) {
+              if (args[1]) args[1] = rewrite(args[1]);
+              return oldOpen.apply(this, args);
+          };
+
+          const scriptDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+          if (scriptDesc) {
+              Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+                  set: function(val) { return scriptDesc.set.call(this, rewrite(val)); },
+                  get: function() { return scriptDesc.get.call(this); }
+              });
+          }
+
+          const oldWorker = window.Worker;
+          window.Worker = function(workerUrl, options) {
+              const rewritten = rewrite(workerUrl);
+              if (rewritten.startsWith('blob:') || rewritten.startsWith('data:')) {
+                  return new oldWorker(rewritten, options);
+              }
+              const blobCode = 'importScripts("' + rewritten + '");';
+              const blob = new Blob([blobCode], { type: 'application/javascript' });
+              return new oldWorker(URL.createObjectURL(blob), options);
+          };
+      })();
+      <\/script>
+      `;
+
       let processed = html;
-      if (processed.indexOf("<head>") !== -1) {
-        processed = processed.replace(
-          "<head>",
-          '<head><base href="' + targetOrigin + '/">'
-        );
+      if (processed.toLowerCase().includes('<head>')) {
+          processed = processed.replace(/<head>/i, '<head>\n' + interceptor);
       } else {
-        processed = '<base href="' + targetOrigin + '/">' + processed;
+          processed = interceptor + '\n' + processed;
       }
 
       document.getElementById("x1").srcdoc = processed;
