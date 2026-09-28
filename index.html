@@ -33,9 +33,9 @@ html, body {
 <iframe id="x1"></iframe>
 <script>
 (function() {
-  const relayBase = "https://network-98.network-logic.deno.net";
+  const relayBase = "https://network-aqzh.onrender.com";
   const targetOrigin = "https://core-logic-utils.github.io";
-  const proxyUrl = relayBase + "/api/relay.js?url=" + encodeURIComponent(targetOrigin);
+  const proxyUrl = relayBase + "/api/relay?url=" + encodeURIComponent(targetOrigin);
   
   fetch(proxyUrl)
     .then(function(response) {
