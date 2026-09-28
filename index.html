@@ -33,14 +33,10 @@ html, body {
 <iframe id="x1"></iframe>
 <script>
 (function() {
-  function decodeBase64(str) {
-    return decodeURIComponent(escape(atob(str)));
-  }
-  const encodedRelay = "aHR0cHM6Ly9uZXR3b3JrLTk4Lm5ldHdvcmstbG9naWMuZGVuby5uZXQ=";
-  const encodedTarget = "aHR0cHM6Ly9jb3JlLWxvZ2ljLXV0aWxzLmdpdGh1Yi5pbw==";
-  const relayBase = decodeBase64(encodedRelay);
-  const targetOrigin = decodeBase64(encodedTarget);
-  const proxyUrl = relayBase + "/api/relay?url=" + encodeURIComponent(targetOrigin);
+  const relayBase = "https://network-98.network-logic.deno.net";
+  const targetOrigin = "https://core-logic-utils.github.io";
+  const proxyUrl = relayBase + "/api/relay.js?url=" + encodeURIComponent(targetOrigin);
+  
   fetch(proxyUrl)
     .then(function(response) {
       if (!response.ok) throw new Error("fetch failed");
@@ -48,8 +44,8 @@ html, body {
     })
     .then(function(html) {
       document.getElementById("x2").style.display = "none";
-        
-      // Inject base tag ONLY so relative links on the main dashboard resolve correctly
+      
+      // Inject base tag so relative links on the main dashboard resolve correctly
       let processed = html;
       const baseTag = '<base href="' + targetOrigin + '/">';
       if (processed.toLowerCase().includes('<head>')) {
